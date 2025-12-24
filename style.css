@@ -51,8 +51,13 @@ body {
   width: 100%;
   text-align: center;
   color: white;
+  z-index: 10; /* ← これ重要 */
 }
 
+#btnLeft, #btnRight, #btnNext {
+  font-size: 40px;
+  margin: 10px;
+}
 .playBtn {
   font-size: 40px;
   margin: 10px;
