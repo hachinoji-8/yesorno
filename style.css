@@ -44,6 +44,8 @@ body {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  position: relative;   /* ← これが絶対に必要 */
+  z-index: 1;           /* ← ボタンより下に置く */
 }
 
 /* PLAYボタン全体のレイヤー */
