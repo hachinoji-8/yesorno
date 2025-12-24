@@ -110,6 +110,62 @@ function renderSlideList() {
   btnPlay.onclick = startPlay;
   list.appendChild(btnPlay);
 }
+// ------------------------------
+// 分岐、直列、削除ロジック追加
+// ------------------------------
+async function addBranch(key) {
+  let num = parseInt(key[0]) + 1;
+  let nextA = num + "A";
+  let nextB = num + "B";
+
+  currentSlide.nodes[key].type = "branch";
+  currentSlide.nodes[key].yes = nextA;
+  currentSlide.nodes[key].no = nextB;
+
+  currentSlide.nodes[nextA] = { type: "linear", next: null };
+  currentSlide.nodes[nextB] = { type: "linear", next: null };
+
+  await saveSlide();
+  renderTree();
+}
+
+async function addLinear(key) {
+  let num = parseInt(key[0]) + 1;
+  let nextA = num + "A";
+
+  currentSlide.nodes[key].type = "linear";
+  currentSlide.nodes[key].next = nextA;
+
+  currentSlide.nodes[nextA] = { type: "linear", next: null };
+
+  await saveSlide();
+  renderTree();
+}
+
+async function deleteNode(key) {
+  if (!isLeafNode(key)) {
+    alert("最下層だけ削除できます");
+    return;
+  }
+
+  delete currentSlide.nodes[key];
+
+  // 親の参照を消す
+  let parent = getParentNode(key);
+  let p = currentSlide.nodes[parent];
+  if (p) {
+    if (p.type === "branch") {
+      if (p.yes === key) p.yes = null;
+      if (p.no === key) p.no = null;
+    }
+    if (p.type === "linear" && p.next === key) {
+      p.next = null;
+    }
+  }
+
+  await saveSlide();
+  renderTree();
+}
 
 // ------------------------------
 // ツリー描画
@@ -123,8 +179,13 @@ async function renderTree() {
   for (let k of keys) {
     let div = document.createElement("div");
     div.className = "node";
-    div.textContent = k;
 
+    // ノード名
+    let title = document.createElement("div");
+    title.textContent = k;
+    div.appendChild(title);
+
+    // 画像
     let blob = await loadImage(currentSlideKey + "_" + k);
     if (blob) {
       let img = document.createElement("img");
@@ -137,9 +198,51 @@ async function renderTree() {
       div.appendChild(document.createTextNode("\nNO IMAGE"));
     }
 
+    // ボタンエリア
+    let btnArea = document.createElement("div");
+    btnArea.style.marginTop = "5px";
+
+    // 分岐
+    let btnBranch = document.createElement("button");
+    btnBranch.textContent = "＋Y";
+    btnBranch.onclick = e => {
+      e.stopPropagation();
+      addBranch(k);
+    };
+    btnArea.appendChild(btnBranch);
+
+    // 直列
+    let btnLinear = document.createElement("button");
+    btnLinear.textContent = "＋｜";
+    btnLinear.onclick = e => {
+      e.stopPropagation();
+      addLinear(k);
+    };
+    btnArea.appendChild(btnLinear);
+
+    // 削除
+    let btnDelete = document.createElement("button");
+    btnDelete.textContent = "－";
+    btnDelete.onclick = e => {
+      e.stopPropagation();
+      deleteNode(k);
+    };
+    btnArea.appendChild(btnDelete);
+
+    div.appendChild(btnArea);
+
+    // 画像選択
     div.onclick = () => selectImage(k);
+
     area.appendChild(div);
   }
+}
+// ------------------------------
+// ○×UI切替得
+// ------------------------------
+function togglePlayMode() {
+  playMode = (playMode === "yesno") ? "marubatsu" : "yesno";
+  alert("PLAY画面の表示モードを変更しました");
 }
 
 // ------------------------------
@@ -158,7 +261,37 @@ function selectImage(nodeKey) {
 
   input.click();
 }
+// ------------------------------
+// PLAY画面のボタン表示を関数化
+// ------------------------------
 
+function renderPlayButtons(node) {
+  const btnLeft = document.getElementById("btnLeft");
+  const btnRight = document.getElementById("btnRight");
+  const btnNext = document.getElementById("btnNext");
+
+  // まず全部表示状態に戻す
+  btnLeft.classList.remove("hidden");
+  btnRight.classList.remove("hidden");
+  btnNext.classList.remove("hidden");
+
+  if (node.type === "branch") {
+    // YES / NO or 〇 / ×
+    if (playMode === "yesno") {
+      btnLeft.textContent = "NO";
+      btnRight.textContent = "YES";
+    } else {
+      btnLeft.textContent = "×";
+      btnRight.textContent = "〇";
+    }
+    btnNext.classList.add("hidden");
+
+  } else {
+    // NEXT only
+    btnLeft.classList.add("hidden");
+    btnRight.classList.add("hidden");
+  }
+}
 // ------------------------------
 // PLAY開始
 // ------------------------------
@@ -185,6 +318,7 @@ async function playNode(key) {
   btns.classList.add("hidden");
 
   setTimeout(() => btns.classList.remove("hidden"), 2000);
+  renderPlayButtons(currentSlide.nodes[key]);
 }
 
 // ------------------------------
