@@ -2,6 +2,9 @@ let slides = [];
 let currentSlide = null;
 let currentSlideKey = null;
 let currentPlayNode = null;
+let playMode = "yesno"; 
+
+
 
 // ------------------------------
 // 初期化（DB読み込み後に呼ばれる）
