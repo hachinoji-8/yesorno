@@ -52,3 +52,10 @@ body {
   text-align: center;
   color: white;
 }
+
+.playBtn {
+  font-size: 40px;
+  margin: 10px;
+}
+
+
