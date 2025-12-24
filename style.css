@@ -32,6 +32,7 @@ body {
   display: none;
 }
 
+/* PLAY画面 */
 #play {
   position: fixed;
   top: 0; left: 0;
@@ -45,22 +46,39 @@ body {
   object-fit: contain;
 }
 
+/* PLAYボタン全体のレイヤー */
 #playButtons {
   position: absolute;
-  bottom: 20px;
+  bottom: 40px;
   width: 100%;
-  text-align: center;
-  color: white;
-  z-index: 10; /* ← これ重要 */
+  height: 80px;
+  pointer-events: none; /* ← 画像タップを邪魔しない */
+  z-index: 10;
 }
 
-#btnLeft, #btnRight, #btnNext {
-  font-size: 40px;
-  margin: 10px;
-}
+/* ボタン共通 */
 .playBtn {
-  font-size: 40px;
-  margin: 10px;
+  position: absolute;
+  font-size: 48px;
+  color: white;
+  font-weight: bold;
+  pointer-events: auto; /* ← ボタン自体はタップ可能 */
+}
+
+/* 左ボタン（NO / ×） */
+.leftBtn {
+  left: 20px;
+}
+
+/* 右ボタン（YES / 〇） */
+.rightBtn {
+  right: 20px;
+}
+
+/* NEXT（中央） */
+.nextBtn {
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 
